@@ -1,0 +1,8 @@
+name: BlockSaber
+author: rex2go
+version: 1.0
+main: com.timcodes.blocksaber.BlockSaber
+api-version: 1.20
+commands:
+  blocksaber:
+    aliases: [bs]

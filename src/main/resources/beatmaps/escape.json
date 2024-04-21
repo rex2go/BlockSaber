@@ -1,0 +1,14 @@
+{
+  "title": "Escape",
+  "author": "Jaroslav Beck, Summer Haze",
+  "difficulty": "EASY",
+  "bpm": 175,
+  "startMs": 0,
+  "durationMs": 15000,
+  "bars": {
+    "09": "R4---B3-----R4-B3---",
+    "10": "R4---B3-----R4-B3---",
+    "11": "R4---B3-----R4-B3---",
+    "12": "R4---B3-----R4-B3---"
+  }
+}
