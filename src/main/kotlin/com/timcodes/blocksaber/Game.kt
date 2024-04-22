@@ -48,8 +48,6 @@ class Game(val beatMap: BeatMap, val player: Player) {
     fun start() {
         startTime = System.currentTimeMillis()
 
-        beatMatcher.start()
-
         player.playSound(player.location, beatMap.sound, SoundCategory.MASTER, 1.0f, 1.0f, 0)
 
         player.teleport(Location(player.world, 0.0, 20000.0, 0.0, -90.0f, 0.0f))

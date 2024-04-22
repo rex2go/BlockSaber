@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import com.timcodes.blocksaber.BlockSaber
 import com.timcodes.blocksaber.beatelement.BeatElementLocation
 import com.timcodes.blocksaber.beatelement.BeatElementType
+import org.bukkit.Bukkit
 import java.io.File
 import java.io.FileReader
 
@@ -54,7 +55,7 @@ class BeatMapLoader {
 
                         val beatElementType = BeatElementType.fromCode(parts[0])
 
-                        val actionLocation: BeatElementLocation = if(parts[1] !== "?") {
+                        val actionLocation: BeatElementLocation = if(!parts[1].contentEquals("?")) {
                             BeatElementLocation.fromId(parts[1].toInt())
                         } else {
                             BeatElementLocation.entries.toTypedArray().random()
