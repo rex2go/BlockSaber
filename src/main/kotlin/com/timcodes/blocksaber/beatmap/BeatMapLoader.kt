@@ -25,6 +25,7 @@ class BeatMapLoader {
             val title = json.get("title").asString
             val author = json.get("author").asString
             val difficulty = BeatMapDifficulty.valueOf(json.get("difficulty").asString)
+            val sound = json.get("sound").asString
             val bpm = json.get("bpm").asInt
             val startMs = json.get("startMs").asLong
             val durationMs = json.get("durationMs").asLong
@@ -52,7 +53,12 @@ class BeatMapLoader {
                         val parts = action.split("").filter { it.isNotEmpty() }
 
                         val beatElementType = BeatElementType.fromCode(parts[0])
-                        val actionLocation = BeatElementLocation.fromId(parts[1].toInt())
+
+                        val actionLocation: BeatElementLocation = if(parts[1] !== "?") {
+                            BeatElementLocation.fromId(parts[1].toInt())
+                        } else {
+                            BeatElementLocation.entries.toTypedArray().random()
+                        }
 
                         subBeatActions[subBeat] = BeatAction(beatElementType, actionLocation)
                     }
@@ -64,7 +70,7 @@ class BeatMapLoader {
             }
 
 
-            return BeatMap(title, author, difficulty, bpm, startMs, durationMs, bars)
+            return BeatMap(title, author, difficulty, sound, bpm, startMs, durationMs, bars)
         }
     }
 }

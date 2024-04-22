@@ -1,6 +1,5 @@
 package com.timcodes.blocksaber
 
-import org.bukkit.Bukkit
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 

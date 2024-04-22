@@ -3,18 +3,26 @@ package com.timcodes.blocksaber
 import com.timcodes.blocksaber.beatelement.AbstractBeatElement
 import com.timcodes.blocksaber.beatmap.BeatMap
 import org.bukkit.*
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 
 class Game(val beatMap: BeatMap, val player: Player) {
 
     var startTime: Long = 0
 
     var beatMatcher = BeatMatcher(beatMap.bpm, this)
+
+    var combo = 0
+
+    var hp = 100
 
     private var gameTask: BukkitTask? = null
 
@@ -42,8 +50,7 @@ class Game(val beatMap: BeatMap, val player: Player) {
 
         beatMatcher.start()
 
-        // TODO
-        player.playSound(player.location, "blocksaber:blocksaber.escape", SoundCategory.MASTER, 1.0f, 1.0f, 0)
+        player.playSound(player.location, beatMap.sound, SoundCategory.MASTER, 1.0f, 1.0f, 0)
 
         player.teleport(Location(player.world, 0.0, 20000.0, 0.0, -90.0f, 0.0f))
         player.world.time = 16000
@@ -54,6 +61,8 @@ class Game(val beatMap: BeatMap, val player: Player) {
         player.gameMode = GameMode.SURVIVAL
         player.allowFlight = true
         player.isFlying = true
+        player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 99999999, 1, false, false))
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)?.baseValue = 1024.0
 
         gameTask = object : BukkitRunnable() {
             override fun run() {
@@ -81,6 +90,9 @@ class Game(val beatMap: BeatMap, val player: Player) {
                 removeList.forEach {
                     beatElements.remove(it)
                 }
+
+                player.exp = min(max(0.0, hp / 100.0), 1.0).toFloat()
+                player.level = combo
             }
         }.runTaskTimer(BlockSaber.instance, 0, 1)
     }
@@ -97,10 +109,9 @@ class Game(val beatMap: BeatMap, val player: Player) {
     fun onBeat() {
         beat++
 
-        val currentBeat = (beat - 1) % 4
-
-        player.exp = currentBeat.toFloat() / 3.0f
-        player.level = max(ceil(beat / 4.0).toInt(), 1)
+        if(hp < 100) {
+            hp++
+        }
     }
 
     fun onSubBeat() {
@@ -134,8 +145,6 @@ class Game(val beatMap: BeatMap, val player: Player) {
                 val beatElement = subBeatAction.beatElementType.kClass.constructors.first()
                     .call(startLocation, targetLocation, hitTime)
                 beatElements.add(beatElement)
-
-                //Bukkit.broadcastMessage("Bar $currentBar Subbeat $currentSubBeat: ${subBeatAction.beatElementType.code}")
             }
         }
     }
