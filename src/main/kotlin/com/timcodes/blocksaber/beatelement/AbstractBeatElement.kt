@@ -64,9 +64,7 @@ abstract class AbstractBeatElement(private val startLocation: Location, private 
             game.player.sendActionBar(mm("<green>Nice!"))
         }
 
-        game.player.playSound(game.player.location, Sound.BLOCK_LEVER_CLICK, 0.5f, 1.0f)
-
-        hitbox.location.world.spawnParticle(Particle.BLOCK_CRACK, hitbox.location, 10, 0.2, 0.2, 0.2, 0.0, MaterialData(Material.WHITE_WOOL))
+        armorStand.location.world.spawnParticle(Particle.BLOCK_CRACK, armorStand.location.clone().add(0.0, 1.0, 0.0), 3, 0.2, 0.2, 0.2, 0.0, MaterialData(Material.WHITE_WOOL))
 
         game.combo++
 

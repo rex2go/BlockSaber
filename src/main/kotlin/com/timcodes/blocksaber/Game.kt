@@ -93,6 +93,10 @@ class Game(val beatMap: BeatMap, val player: Player) {
 
                 player.exp = min(max(0.0, hp / 100.0), 1.0).toFloat()
                 player.level = combo
+
+                if(hp <= 0) {
+                    stop()
+                }
             }
         }.runTaskTimer(BlockSaber.instance, 0, 1)
     }
