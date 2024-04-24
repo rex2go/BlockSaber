@@ -5,7 +5,6 @@ import com.google.gson.JsonObject
 import com.timcodes.blocksaber.BlockSaber
 import com.timcodes.blocksaber.beatelement.BeatElementLocation
 import com.timcodes.blocksaber.beatelement.BeatElementType
-import org.bukkit.Bukkit
 import java.io.File
 import java.io.FileReader
 
@@ -50,6 +49,16 @@ class BeatMapLoader {
                         }
 
                         val subBeat = index + 1
+
+                        if(action == "SP") {
+                            subBeatActions[subBeat] = BeatAction(BeatElementType.SPEED, BeatElementLocation.TOP)
+                            return@run
+                        }
+
+                        if(action == "PA") {
+                            subBeatActions[subBeat] = BeatAction(BeatElementType.PARTICLE, BeatElementLocation.TOP)
+                            return@run
+                        }
 
                         val parts = action.split("").filter { it.isNotEmpty() }
 

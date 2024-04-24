@@ -1,8 +1,12 @@
 package com.timcodes.blocksaber
 
 import com.timcodes.blocksaber.beatelement.AbstractBeatElement
+import com.timcodes.blocksaber.beatelement.BeatElementType
 import com.timcodes.blocksaber.beatmap.BeatMap
+import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.text.Component
 import org.bukkit.*
+import org.bukkit.Particle.DustOptions
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
@@ -10,9 +14,11 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import java.util.Random
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
+
 
 class Game(val beatMap: BeatMap, val player: Player) {
 
@@ -32,7 +38,18 @@ class Game(val beatMap: BeatMap, val player: Player) {
 
     val beatElements = mutableListOf<AbstractBeatElement>()
 
-    private val spread = 1.2
+    private val spread = 0.7
+
+    var particles = false
+
+    var speed = false
+
+    private var bossBar = BossBar.bossBar(
+        Component.text(beatMap.author + " - " + beatMap.title),
+        1.0f,
+        BossBar.Color.BLUE,
+        BossBar.Overlay.PROGRESS
+    )
 
     private val locationOffsets = listOf(
         Vector(0.0, spread, 0.0),
@@ -61,6 +78,12 @@ class Game(val beatMap: BeatMap, val player: Player) {
         player.isFlying = true
         player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 99999999, 1, false, false))
         player.getAttribute(Attribute.GENERIC_ATTACK_SPEED)?.baseValue = 1024.0
+        player.exp = 0f
+        player.saturation = 20f
+        player.health = 20.0
+        player.level = 0
+        player.foodLevel = 20
+        player.showBossBar(bossBar)
 
         gameTask = object : BukkitRunnable() {
             override fun run() {
@@ -89,10 +112,10 @@ class Game(val beatMap: BeatMap, val player: Player) {
                     beatElements.remove(it)
                 }
 
-                player.exp = min(max(0.0, hp / 100.0), 1.0).toFloat()
+                bossBar.progress(min(max(0.0, hp / 100.0), 1.0).toFloat())
                 player.level = combo
 
-                if(hp <= 0) {
+                if (hp <= 0) {
                     stop()
                 }
             }
@@ -106,13 +129,34 @@ class Game(val beatMap: BeatMap, val player: Player) {
         beatMatcher.stop()
 
         beatElements.forEach { it.remove() }
+
+        player.hideBossBar(bossBar)
     }
 
     fun onBeat() {
         beat++
 
-        if(hp < 100) {
+        if (hp < 100) {
             hp++
+        }
+
+        if(particles) {
+            // TODO: better colors
+            player.world.spawnParticle(
+                Particle.REDSTONE,
+                player.location,
+                200,
+                10.0,
+                5.0,
+                10.0,
+                DustOptions(
+                    Color.fromRGB(
+                        Random().nextInt(256),
+                        Random().nextInt(256),
+                        Random().nextInt(256)
+                    ), 1f
+                )
+            )
         }
     }
 
@@ -144,9 +188,23 @@ class Game(val beatMap: BeatMap, val player: Player) {
 
                 val hitTime = System.currentTimeMillis() + barLengthMs
 
-                val beatElement = subBeatAction.beatElementType.kClass.constructors.first()
-                    .call(startLocation, targetLocation, hitTime)
-                beatElements.add(beatElement)
+                // TODO: beat element type refactor
+                if (subBeatAction.beatElementType == BeatElementType.PARTICLE) {
+                    particles = !particles
+                } else if (subBeatAction.beatElementType == BeatElementType.SPEED) {
+                    if(!speed) {
+                        player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 99999999, 1, false, false))
+                    } else {
+                        player.removePotionEffect(PotionEffectType.SPEED)
+                    }
+
+                    speed = !speed
+                } else if (subBeatAction.beatElementType.kClass != null) {
+                    // TODO: remove reflection
+                    val beatElement = subBeatAction.beatElementType.kClass.constructors.first()
+                        .call(startLocation, targetLocation, hitTime)
+                    beatElements.add(beatElement)
+                }
             }
         }
     }
